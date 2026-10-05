@@ -64,6 +64,15 @@ class Merge(unittest.TestCase):
         self.assertEqual(sorted(m['cc']), ['canada', 'united-states'])
         self.assertEqual(sorted(m['src']), ['off', 'usda'])
 
+class NewestWins(unittest.TestCase):
+    def test_same_source_later_record_wins(self):
+        # USDA re-lists products under new ids over the years; rows come oldest first
+        old = rec(source='usda', sugars=36.0, name='FROOT LOOPS (2019)')
+        new = rec(source='usda', sugars=34.5, name='FROOT LOOPS')
+        m = merge(old, new)
+        self.assertEqual(m['s'], 34.5)
+        self.assertEqual(m['n'], 'FROOT LOOPS')
+
 class Countries(unittest.TestCase):
     def test_slug(self):
         self.assertEqual(country_slug('United Kingdom'), 'united-kingdom')

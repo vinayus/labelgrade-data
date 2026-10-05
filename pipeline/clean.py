@@ -86,9 +86,14 @@ def sane(r):
 
 
 def merge(a, b):
-    """Same barcode from two places. USDA is manufacturer-submitted, so its numbers win;
-    fill any gaps from the other one."""
-    first, second = (b, a) if 'usda' in b['src'] and 'usda' not in a['src'] else (a, b)
+    """Same barcode twice. USDA is manufacturer-submitted, so its numbers beat Open Food Facts;
+    within one source the newer row wins. Gaps get filled from the other record."""
+    if set(a['src']) == set(b['src']):
+        first, second = b, a          # same source listed twice: the later (newer) row wins
+    elif 'usda' in b['src'] and 'usda' not in a['src']:
+        first, second = b, a
+    else:
+        first, second = a, b
     m = dict(first)
     for k, v in second.items():
         if k in ('src', 'cc'):
