@@ -1,0 +1,40 @@
+name: Refresh data
+
+on:
+  # twice a year, a couple of weeks after USDA's April and December releases
+  schedule:
+    - cron: '0 6 15 1,5 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tests
+        run: python -m unittest discover -s tests -t .
+      - name: Download sources
+        run: python -m pipeline.fetch --dir cache
+      - name: Build packs
+        run: python -m pipeline.build --off cache/off.csv.gz --usda cache/usda.zip --out out
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="data-$(date +%Y-%m-%d)"
+          {
+            echo "Built $(date +%Y-%m-%d) from:"
+            sed 's/^/- /' cache/versions.txt
+            echo
+            echo 'Contains information from Open Food Facts (https://world.openfoodfacts.org), made available under the Open Database License (ODbL), and USDA FoodData Central branded foods (public domain).'
+            echo
+            echo '```'; cat out/stats.json; echo '```'
+          } > notes.md
+          gh release create "$tag" out/*.ndjson.gz out/index.json out/stats.json --title "Data $(date +%Y-%m-%d)" --notes-file notes.md --latest
