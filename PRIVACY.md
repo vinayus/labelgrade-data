@@ -36,4 +36,4 @@ These services receive your IP address as part of any web request, as all websit
 Changes to this policy are noted here with a new date.
 
 ## Contact
-Open an issue at https://github.com/vinayus/labelgrade-data/issues (questions, corrections and privacy requests).
+Email vteam2005@yahoo.com, or open an issue at https://github.com/vinayus/labelgrade-data/issues (questions, corrections and privacy requests).
